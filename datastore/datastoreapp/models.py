@@ -14,5 +14,7 @@ class File(models.Model):
     )
 
     def __str__(self):
-        return f"{self.id} {self.name}, for folder {self.folder}"
+        if self.parent:
+            return f"{self.id} {self.name} with parent {self.parent}"
+        return f"{self.id} {self.name}"
 
