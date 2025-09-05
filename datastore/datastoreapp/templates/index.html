@@ -5,7 +5,25 @@ Home
 {% endblock %}
 
 {% block content %}
-Hello World
+<h2>Upload a File</h2>
+<form id="uploadForm" enctype="multipart/form-data">
+  <input type="file" id="fileInput" name="file" required />
+  <button type="submit">Upload</button>
+</form>
+
+<div id="uploadStatus"></div>
+
+ <div class="center">
+        <table class="table table-striped">
+            <tr>
+                <th>Filename</th>
+                <th>Size</th>
+                <th>Time Uploaded</th>
+            </tr>
+            <tbody id="file-table"></tbody>
+           
+        </table>
+        </div>
 {% endblock %}
 
 {% block script %}
