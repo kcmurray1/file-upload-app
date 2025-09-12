@@ -82,10 +82,10 @@ load_dotenv()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('LOCAL_DEV_DB'),
-        'USER' : 'root',
-        'PASSWORD': os.getenv('MYSQL_PASSWORD'),
-        'HOST': 'localhost',
+        'NAME': os.getenv('LOCAL_DEV_DB', 'files'),
+        'USER' : os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
         'PORT': '3306',
     }
 }
@@ -126,6 +126,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_DIRS = (
     BASE_DIR / "static",
