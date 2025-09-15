@@ -1,30 +1,48 @@
 
-
-
-const getChannels = async () => {
+const getFiles = async () => {
     console.log("getting files..")
     try {
         const response = await fetch('/api/files')
         if (response.ok) {
             const data = await response.json()
             console.log(data)
+
             let content = '';
-            data.forEach(channel => {
-                content += `<tr><td>${channel.name}</td><td>${channel.size}</td><td>${channel.time_uploaded}</td></tr>`
+            data.forEach(file => {
+                content += `
+                  <tr data-filename="${file.name}" class="file-row" style="cursor:pointer;">
+                    <td>${file.name}</td>
+                    <td>${file.size}</td>
+                    <td>${file.time_uploaded}</td>
+                  </tr>`;
             });
 
             document.getElementById("file-table").innerHTML = content;
-        
-        }
-        else
-        {
+
+            // make each row clickable
+            document.querySelectorAll(".file-row").forEach(row => {
+                row.addEventListener("click", async () => {
+                    const filename = row.getAttribute("data-filename");
+                    try {
+                        const presignRes = await fetch(`/api/files/${filename}/download`);
+                        if (!presignRes.ok) throw new Error("Failed to get presigned URL");
+
+                        const { url } = await presignRes.json();
+                        window.open(url, "_blank"); // open in new tab
+                    } catch (err) {
+                        console.error("Error fetching file:", err);
+                    }
+                });
+            });
+
+        } else {
             console.log('failed to fetch files..')
         }
-    }
-    catch (error) {
-        console.log('failed to fetch channels' + error)
+    } catch (error) {
+        console.log('failed to fetch files ' + error)
     }
 }
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -69,5 +87,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-document.addEventListener('DOMContentLoaded', getChannels);
+document.addEventListener('DOMContentLoaded', getFiles);
 

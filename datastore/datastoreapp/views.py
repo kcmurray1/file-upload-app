@@ -3,8 +3,8 @@ from rest_framework import generics
 from datastoreapp.models import File
 from datastoreapp.serializers import FileSerializer
 import boto3
+import mimetypes
 
-# Create your views here.
 class FileRecord(generics.RetrieveUpdateDestroyAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
@@ -27,19 +27,37 @@ class FileCollection(APIView):
         if not uploaded_file:
             return Response({"detail": "No file provided"}, status=400)
 
-        # Save to MySQL
-        file_record = File.objects.create(
-            name=uploaded_file.name,
-            size=uploaded_file.size,
-        )
 
-        # upload to s3
+        # upload to s3 and Save to MySQL
         try:
             s3 = boto3.client('s3')
             s3.upload_fileobj(uploaded_file, 'devop-bucket-01', uploaded_file.name)
-            return Response({"result: Uploaded to S3!"}, status=status.HTTP_201_CREATED)
+             
+            file_record = File.objects.create(
+                name=uploaded_file.name,
+                size=uploaded_file.size,
+            )
         except Exception as e:
-            print(e)
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         # Successful upload
         return Response(FileSerializer(file_record).data, status=status.HTTP_201_CREATED)
+
+class FileDownload(APIView):
+    def get(self, request, filename):
+        s3 = boto3.client("s3")
+        content_type, _ = mimetypes.guess_type(filename)
+        if content_type is None:
+            content_type = "application/octet-stream"
+
+        url = s3.generate_presigned_url(
+            "get_object",
+            Params={
+              "Bucket": "devop-bucket-01",
+              "Key": filename,
+              "ResponseContentDisposition" : f"inline; filename={filename}",
+              "ResponseContentType" : content_type,
+            },
+            ExpiresIn=3600
+        )
+        return Response({"url": url})
+

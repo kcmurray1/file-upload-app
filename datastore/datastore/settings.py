@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': os.getenv('LOCAL_DEV_DB', 'files'),
         'USER' : os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': '3306',
     }
 }
