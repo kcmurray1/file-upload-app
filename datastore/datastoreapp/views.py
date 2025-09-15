@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from datastoreapp.models import File
 from datastoreapp.serializers import FileSerializer
+import boto3
 
 # Create your views here.
 class FileRecord(generics.RetrieveUpdateDestroyAPIView):
@@ -32,5 +33,13 @@ class FileCollection(APIView):
             size=uploaded_file.size,
         )
 
+        # upload to s3
+        try:
+            s3 = boto3.client('s3')
+            s3.upload_fileobj(uploaded_file, 'devop-bucket-01', uploaded_file.name)
+            return Response({"result: Uploaded to S3!"}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(e)
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         # Successful upload
         return Response(FileSerializer(file_record).data, status=status.HTTP_201_CREATED)
